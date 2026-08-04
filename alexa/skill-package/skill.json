@@ -12,11 +12,7 @@
       "distributionCountries": []
     },
     "apis": {
-      "custom": {
-        "endpoint": {
-          "uri": "ask-custom-alexa-skill://"
-        }
-      }
+      "custom": {}
     },
     "manifestVersion": "1.0",
     "privacyAndCompliance": {
