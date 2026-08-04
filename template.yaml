@@ -1,0 +1,31 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Alexa ChatGPT Skill Lambda backend
+
+Globals:
+  Function:
+    Runtime: nodejs20.x
+    Timeout: 20
+    MemorySize: 256
+    Tracing: Active
+
+Resources:
+  AlexaSkillFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: alexa-chatgpt-skill
+      CodeUri: .
+      Handler: dist/index.handler
+      Policies:
+        - AWSLambdaBasicExecutionRole
+      Environment:
+        Variables:
+          GEMINI_API_KEY: ''
+          GEMINI_API_URL: ''
+          GEMINI_MODEL: gemini-3.5-flash
+          MAX_SESSION_TURNS: '4'
+
+Outputs:
+  AlexaSkillFunctionArn:
+    Description: Lambda ARN for Alexa skill endpoint
+    Value: !GetAtt AlexaSkillFunction.Arn
