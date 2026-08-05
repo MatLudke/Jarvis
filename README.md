@@ -66,10 +66,12 @@ npm test
 
 ## Alexa Skill configuration
 
-Use files in `alexa/skill-package/`:
+Use the Alexa-hosted import structure at the repo root:
 
-- `skill.json` (manifest)
-- `interactionModels/custom/en-US.json` (intent model)
+- `skill-package/skill.json` (manifest)
+- `skill-package/interactionModels/custom/en-US.json` (intent model)
+- `lambda/index.js` (handler entrypoint)
+- `lambda/package.json` (Lambda package metadata)
 
 In Alexa Developer Console:
 
