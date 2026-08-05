@@ -7,7 +7,7 @@
         }
       },
       "isAvailableWorldwide": true,
-      "testingInstructions": "Ask a question and verify the answer comes from your Lambda backend using OpenAI.",
+      "testingInstructions": "Ask a question and verify the answer comes from your Lambda backend using Google Gemini.",
       "category": "KNOWLEDGE_AND_TRIVIA",
       "distributionCountries": []
     },
