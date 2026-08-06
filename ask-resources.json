@@ -11,6 +11,9 @@
         "default": {
           "src": "./lambda"
         }
+      },
+      "infrastructure": {
+        "type": "@ask-cli/hosted-skill-deployer"
       }
     }
   }
