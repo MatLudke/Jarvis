@@ -2,7 +2,7 @@
   "name": "jarvis",
   "version": "1.0.0",
   "description": "Jarvis Alexa Skill (Lambda + Google Gemini via AI Studio)",
-  "main": "dist/index.js",
+  "main": "lambda/index.js",
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "lint": "eslint .",

@@ -14,8 +14,8 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: alexa-chatgpt-skill
-      CodeUri: .
-      Handler: dist/index.handler
+      CodeUri: lambda/
+      Handler: index.handler
       Policies:
         - AWSLambdaBasicExecutionRole
       Environment:

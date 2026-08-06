@@ -9,7 +9,7 @@
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
     "rootDir": "src",
-    "outDir": "dist",
+    "outDir": "lambda",
     "types": ["node", "aws-lambda"]
   },
   "include": ["src/**/*.ts"]
