@@ -15,7 +15,27 @@ function requireEnv(name: string): string {
   return value;
 }
 
-function extractResponseText(response: any): string {
+interface GeminiCandidateContentPart {
+  text?: string;
+}
+
+interface GeminiCandidate {
+  output_text?: string;
+  content?: string | GeminiCandidateContentPart[];
+}
+
+interface GeminiResponseItem {
+  output_text?: string;
+  candidates?: GeminiCandidate[];
+}
+
+interface GeminiResponse {
+  output_text?: string;
+  candidates?: GeminiCandidate[];
+  responses?: GeminiResponseItem[];
+}
+
+function extractResponseText(response: GeminiResponse): string {
   // Flexible parsing to accommodate different Gemini/AI Studio response shapes.
   if (!response) throw new Error('Empty response from Gemini API');
   if (typeof response.output_text === 'string' && response.output_text.trim()) return response.output_text.trim();
@@ -26,7 +46,7 @@ function extractResponseText(response: any): string {
     if (typeof first.output_text === 'string' && first.output_text.trim()) return first.output_text.trim();
     if (first.content) {
       if (Array.isArray(first.content)) {
-        return first.content.map((c: any) => c.text || '').join(' ').trim();
+        return first.content.map((c) => c.text || '').join(' ').trim();
       }
       if (typeof first.content === 'string') return first.content.trim();
     }
@@ -93,7 +113,7 @@ export class GeminiChatClient implements ChatClient {
       throw new Error(`Gemini API error ${res.status}: ${text}`);
     }
 
-    const json = await res.json();
+    const json = (await res.json()) as GeminiResponse;
     return extractResponseText(json);
   }
 }

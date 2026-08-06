@@ -2,22 +2,21 @@ import { GeminiChatClient } from '../src/openaiClient';
 import { ChatTurn } from '../src/types';
 
 describe('GeminiChatClient', () => {
-  const originalFetch = global.fetch;
+  let fetchSpy: jest.SpyInstance;
+
   beforeEach(() => {
-    // @ts-ignore
-    global.fetch = jest.fn();
+    fetchSpy = jest.spyOn(global, 'fetch');
   });
+
   afterEach(() => {
-    // @ts-ignore
-    global.fetch = originalFetch;
+    fetchSpy.mockRestore();
   });
 
   it('returns text from simple response shape', async () => {
-    // @ts-ignore
-    global.fetch.mockResolvedValueOnce({
+    fetchSpy.mockResolvedValueOnce({
       ok: true,
       json: async () => ({ output_text: 'Gemini answer' })
-    });
+    } as unknown as Response);
 
     const client = new GeminiChatClient('key', 'https://example.test/gemini', 'gemini-3.5-flash');
     const answer = await client.getAnswer('Hello', [{ role: 'user', text: 'Hi' } as ChatTurn]);
@@ -26,10 +25,15 @@ describe('GeminiChatClient', () => {
   });
 
   it('throws on non-ok response', async () => {
-    // @ts-ignore
-    global.fetch.mockResolvedValueOnce({ ok: false, status: 500, text: async () => 'internal' });
+    fetchSpy.mockResolvedValueOnce({
+      ok: false,
+      status: 500,
+      text: async () => 'internal'
+    } as unknown as Response);
+
     const client = new GeminiChatClient('key', 'https://example.test/gemini', 'gemini-3.5-flash');
 
     await expect(client.getAnswer('Hello', [])).rejects.toThrow(/Gemini API error/);
   });
 });
+
