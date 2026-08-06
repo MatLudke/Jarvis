@@ -15,7 +15,10 @@
             "ask {question}",
             "question {question}",
             "tell me {question}",
-            "{question}"
+            "can you answer {question}",
+            "search for {question}",
+            "what is {question}",
+            "how do I {question}"
           ]
         },
         {
