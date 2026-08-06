@@ -1,7 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.GlobalErrorHandler = exports.IntentReflectorHandler = exports.SessionEndedRequestHandler = exports.FallbackIntentHandler = exports.CancelAndStopIntentHandler = exports.HelpIntentHandler = exports.LaunchRequestHandler = void 0;
+exports.GlobalErrorHandler = exports.IntentReflectorHandler = exports.SessionEndedRequestHandler = exports.CancelAndStopIntentHandler = exports.HelpIntentHandler = exports.LaunchRequestHandler = void 0;
 exports.createChatIntentHandler = createChatIntentHandler;
+exports.createFallbackIntentHandler = createFallbackIntentHandler;
 exports.buildLambdaHandler = buildLambdaHandler;
 const ask_sdk_core_1 = require("ask-sdk-core");
 const sessionMemory_1 = require("./sessionMemory");
@@ -72,17 +73,26 @@ exports.CancelAndStopIntentHandler = {
         return handlerInput.responseBuilder.speak('Goodbye!').getResponse();
     }
 };
-exports.FallbackIntentHandler = {
-    canHandle(handlerInput) {
-        return getIntentName(handlerInput) === 'AMAZON.FallbackIntent';
-    },
-    handle(handlerInput) {
-        return handlerInput.responseBuilder
-            .speak('I can help answer your questions. Try asking me something directly.')
-            .reprompt(REPROMPT_TEXT)
-            .getResponse();
-    }
-};
+function createFallbackIntentHandler(chatClient) {
+    return {
+        canHandle(handlerInput) {
+            return getIntentName(handlerInput) === 'AMAZON.FallbackIntent';
+        },
+        async handle(handlerInput) {
+            try {
+                const answer = await chatClient.getAnswer('Hello, explain briefly in one short sentence what you can do as Jarvis.', []);
+                const safeAnswer = sanitizeSpeech(answer);
+                return handlerInput.responseBuilder.speak(safeAnswer).reprompt(REPROMPT_TEXT).getResponse();
+            }
+            catch {
+                return handlerInput.responseBuilder
+                    .speak('I am Jarvis. You can ask me anything, for example: ask Jarvis, what is serverless computing?')
+                    .reprompt(REPROMPT_TEXT)
+                    .getResponse();
+            }
+        }
+    };
+}
 exports.SessionEndedRequestHandler = {
     canHandle(handlerInput) {
         return (0, ask_sdk_core_1.getRequestType)(handlerInput.requestEnvelope) === 'SessionEndedRequest';
@@ -106,15 +116,19 @@ exports.GlobalErrorHandler = {
     },
     handle(handlerInput, error) {
         console.error('Skill error', error);
+        const isKeyError = error instanceof Error && error.message.includes('GEMINI_API_KEY');
+        const message = isKeyError
+            ? 'Please set the GEMINI_API_KEY environment variable in your Alexa Lambda configuration.'
+            : 'Sorry, I had trouble handling that request. Please try again.';
         return handlerInput.responseBuilder
-            .speak('Sorry, I had trouble handling that request. Please try again.')
+            .speak(message)
             .reprompt(REPROMPT_TEXT)
             .getResponse();
     }
 };
 function buildLambdaHandler(chatClient) {
     return ask_sdk_core_1.SkillBuilders.custom()
-        .addRequestHandlers(exports.LaunchRequestHandler, createChatIntentHandler(chatClient), exports.HelpIntentHandler, exports.CancelAndStopIntentHandler, exports.FallbackIntentHandler, exports.SessionEndedRequestHandler, exports.IntentReflectorHandler)
+        .addRequestHandlers(exports.LaunchRequestHandler, createChatIntentHandler(chatClient), exports.HelpIntentHandler, exports.CancelAndStopIntentHandler, createFallbackIntentHandler(chatClient), exports.SessionEndedRequestHandler, exports.IntentReflectorHandler)
         .addErrorHandlers(exports.GlobalErrorHandler)
         .lambda();
 }

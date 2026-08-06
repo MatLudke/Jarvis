@@ -88,17 +88,28 @@ export const CancelAndStopIntentHandler: RequestHandler = {
   }
 };
 
-export const FallbackIntentHandler: RequestHandler = {
-  canHandle(handlerInput) {
-    return getIntentName(handlerInput) === 'AMAZON.FallbackIntent';
-  },
-  handle(handlerInput) {
-    return handlerInput.responseBuilder
-      .speak('I can help answer your questions. Try asking me something directly.')
-      .reprompt(REPROMPT_TEXT)
-      .getResponse();
-  }
-};
+export function createFallbackIntentHandler(chatClient: ChatClient): RequestHandler {
+  return {
+    canHandle(handlerInput) {
+      return getIntentName(handlerInput) === 'AMAZON.FallbackIntent';
+    },
+    async handle(handlerInput): Promise<Response> {
+      try {
+        const answer = await chatClient.getAnswer(
+          'Hello, explain briefly in one short sentence what you can do as Jarvis.',
+          []
+        );
+        const safeAnswer = sanitizeSpeech(answer);
+        return handlerInput.responseBuilder.speak(safeAnswer).reprompt(REPROMPT_TEXT).getResponse();
+      } catch {
+        return handlerInput.responseBuilder
+          .speak('I am Jarvis. You can ask me anything, for example: ask Jarvis, what is serverless computing?')
+          .reprompt(REPROMPT_TEXT)
+          .getResponse();
+      }
+    }
+  };
+}
 
 export const SessionEndedRequestHandler: RequestHandler = {
   canHandle(handlerInput) {
@@ -125,8 +136,12 @@ export const GlobalErrorHandler: ErrorHandler = {
   },
   handle(handlerInput, error) {
     console.error('Skill error', error);
+    const isKeyError = error instanceof Error && error.message.includes('GEMINI_API_KEY');
+    const message = isKeyError
+      ? 'Please set the GEMINI_API_KEY environment variable in your Alexa Lambda configuration.'
+      : 'Sorry, I had trouble handling that request. Please try again.';
     return handlerInput.responseBuilder
-      .speak('Sorry, I had trouble handling that request. Please try again.')
+      .speak(message)
       .reprompt(REPROMPT_TEXT)
       .getResponse();
   }
@@ -139,7 +154,7 @@ export function buildLambdaHandler(chatClient: ChatClient) {
       createChatIntentHandler(chatClient),
       HelpIntentHandler,
       CancelAndStopIntentHandler,
-      FallbackIntentHandler,
+      createFallbackIntentHandler(chatClient),
       SessionEndedRequestHandler,
       IntentReflectorHandler
     )
