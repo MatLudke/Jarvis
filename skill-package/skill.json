@@ -3,7 +3,14 @@
     "publishingInformation": {
       "locales": {
         "en-US": {
-          "name": "Jarvis"
+          "name": "Jarvis",
+          "summary": "Jarvis Voice Assistant powered by Google Gemini",
+          "description": "Alexa custom skill backend using Google Gemini via AI Studio for conversational voice responses.",
+          "examplePhrases": [
+            "Alexa open jarvis",
+            "Alexa ask jarvis what is serverless computing",
+            "Alexa ask jarvis explain Lambda cold starts"
+          ]
         }
       },
       "isAvailableWorldwide": true,

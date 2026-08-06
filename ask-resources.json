@@ -1,0 +1,17 @@
+{
+  "askcliOptions": {
+    "version": "2.0"
+  },
+  "profiles": {
+    "default": {
+      "skillMetadata": {
+        "src": "./skill-package"
+      },
+      "code": {
+        "default": {
+          "src": "./lambda"
+        }
+      }
+    }
+  }
+}
