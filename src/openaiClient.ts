@@ -7,14 +7,6 @@ export interface ChatClient {
   getAnswer(question: string, history: ChatTurn[]): Promise<string>;
 }
 
-function requireEnv(name: string): string {
-  const value = process.env[name];
-  if (!value) {
-    throw new Error(`Missing required environment variable: ${name}`);
-  }
-  return value;
-}
-
 interface GeminiCandidateContentPart {
   text?: string;
 }
@@ -74,8 +66,8 @@ export class GeminiChatClient implements ChatClient {
   private readonly model: string;
 
   constructor(
-    apiKey: string = requireEnv('GEMINI_API_KEY'),
-    apiUrl: string = process.env.GEMINI_API_URL ?? requireEnv('GEMINI_API_URL'),
+    apiKey: string = process.env.GEMINI_API_KEY ?? '',
+    apiUrl: string = process.env.GEMINI_API_URL ?? 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',
     model: string = process.env.GEMINI_MODEL ?? 'gemini-3.5-flash'
   ) {
     this.apiKey = apiKey;
@@ -93,6 +85,9 @@ export class GeminiChatClient implements ChatClient {
   }
 
   async getAnswer(question: string, history: ChatTurn[]): Promise<string> {
+    if (!this.apiKey || !this.apiKey.trim() || this.apiKey === 'PASTE_YOUR_GEMINI_API_KEY_HERE') {
+      throw new Error('GEMINI_API_KEY is missing. Please set your key in the .env file.');
+    }
     const messages = this.buildMessages(question, history);
     const payload = {
       model: this.model,

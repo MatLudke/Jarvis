@@ -2,13 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.GeminiChatClient = void 0;
 const SYSTEM_PROMPT = 'You are a concise and helpful assistant replying for Alexa voice output. Keep answers clear and conversational.';
-function requireEnv(name) {
-    const value = process.env[name];
-    if (!value) {
-        throw new Error(`Missing required environment variable: ${name}`);
-    }
-    return value;
-}
 function extractResponseText(response) {
     // Flexible parsing to accommodate different Gemini/AI Studio response shapes.
     if (!response)
@@ -50,7 +43,7 @@ class GeminiChatClient {
     apiKey;
     apiUrl;
     model;
-    constructor(apiKey = requireEnv('GEMINI_API_KEY'), apiUrl = process.env.GEMINI_API_URL ?? requireEnv('GEMINI_API_URL'), model = process.env.GEMINI_MODEL ?? 'gemini-3.5-flash') {
+    constructor(apiKey = process.env.GEMINI_API_KEY ?? '', apiUrl = process.env.GEMINI_API_URL ?? 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions', model = process.env.GEMINI_MODEL ?? 'gemini-3.5-flash') {
         this.apiKey = apiKey;
         this.apiUrl = apiUrl;
         this.model = model;
@@ -64,6 +57,9 @@ class GeminiChatClient {
         return messages;
     }
     async getAnswer(question, history) {
+        if (!this.apiKey || !this.apiKey.trim() || this.apiKey === 'PASTE_YOUR_GEMINI_API_KEY_HERE') {
+            throw new Error('GEMINI_API_KEY is missing. Please set your key in the .env file.');
+        }
         const messages = this.buildMessages(question, history);
         const payload = {
             model: this.model,
