@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { buildLambdaHandler } from './handlers';
 import { GeminiChatClient } from './openaiClient';
 
